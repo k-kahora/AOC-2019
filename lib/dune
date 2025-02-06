@@ -1,2 +1,4 @@
 (library
- (name advent))
+ (name input)
+(libraries core lwt cohttp cohttp-lwt-unix)
+)

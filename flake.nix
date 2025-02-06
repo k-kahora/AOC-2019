@@ -40,6 +40,9 @@
             ocamlPackages.core
             # ocamlPackages.re
             ocamlPackages.fmt
+            ocamlPackages.lwt
+            ocamlPackages.cohttp
+            ocamlPackages.cohttp-lwt-unix
             # ocamlPackages.batteries
             ocamlPackages.dune_3
             ocamlPackages.ocaml
