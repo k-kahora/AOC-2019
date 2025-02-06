@@ -6,15 +6,16 @@ let () =
   ()
 
 (* 2    ; 2  ; 654   33583 *)
-let input =
-  Input.fetch_input 2019 1 |> String.split ~on:'\n'
-  |> List.filter ~f:(fun a -> String.( <> ) (Core.String.strip a) "")
+(* let input = *)
+(*   Input.fetch_input 2019 1 |> String.split ~on:'\n' *)
+(*   |> List.filter ~f:(fun a -> String.( <> ) (Core.String.strip a) "") *)
 
 let _input = ["12"; "14"; "1969"; "100756"]
 
 let _input = ["100756"]
 
-let part2 input =
+let part2 _input =
+  let input = ["12"; "14"; "1969"; "100756"] in
   let rec calc_fuel acc mass =
     printf "%d\n" mass ;
     let fuel = (mass / 3) - 2 in
@@ -22,7 +23,8 @@ let part2 input =
   in
   Core.List.fold ~init:0 ~f:calc_fuel (List.map input ~f:int_of_string)
 
-let part1 input =
+let part1 _input =
+  let input = ["12"; "14"; "1969"; "100756"] in
   let calc_fuel acc mass = acc + (int_of_string mass / 3) - 2 in
   Core.List.fold ~init:0 ~f:calc_fuel input
 

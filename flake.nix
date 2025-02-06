@@ -36,6 +36,7 @@
             # ocamlPackages.zarith # Big ints
             # ocamlPackages.ocamlformat-rpc-lib
             ocamlPackages.utop
+            ocamlPackages.ppx_deriving
             ocamlPackages.angstrom
             ocamlPackages.core
             # ocamlPackages.re

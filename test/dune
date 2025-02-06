@@ -1,2 +1,4 @@
 (test
- (name test_advent))
+ (name test_advent)
+  (libraries alcotest advent.lib)
+)
