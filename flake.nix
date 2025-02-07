@@ -37,6 +37,7 @@
             # ocamlPackages.ocamlformat-rpc-lib
             ocamlPackages.utop
             ocamlPackages.ppx_deriving
+            ocamlPackages.ppx_jane
             ocamlPackages.angstrom
             ocamlPackages.core
             # ocamlPackages.re
