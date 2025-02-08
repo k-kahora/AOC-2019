@@ -56,9 +56,54 @@ module Input = struct
     (* String.split input ~on:'\n' |> show_string_list |> printf "%s" ; *)
     String.split input ~on:'\n'
     |> List.map ~f:(fun path -> String.split path ~on:',')
+    |> List.map ~f:(fun a -> List.map a ~f:(fun a -> parse_input a))
+    |> function a :: b :: _ -> (a, b) | _ -> failwith "should be two paths"
 
   type string_list_list = string list list [@@deriving show]
+
   (* |> Core.List.filter ~f:(fun a -> Core.String.strip a <> "") *)
+  let calc_points setup =
+    let generate_range x y num = function
+      | `X ->
+          if num >= 0 then
+            List.map
+              (List.range ~start:`inclusive ~stop:`inclusive x (x + num))
+              ~f:(fun n -> (n, y))
+          else
+            List.map
+              (List.range ~start:`inclusive ~stop:`inclusive (x + num) x)
+              ~f:(fun n -> (n, y))
+      | `Y ->
+          if num >= 0 then
+            List.map
+              (List.range ~start:`inclusive ~stop:`inclusive y (y + num))
+              ~f:(fun n -> (x, n))
+          else
+            List.map
+              (List.range ~start:`inclusive ~stop:`inclusive (y + num) y)
+              ~f:(fun n -> (x, n))
+    in
+    let _, _, lst, steps =
+      List.fold_map ~init:(0, 0, [], 0)
+        ~f:(fun (x, y, acc, steps) (dir, num) ->
+          let steps = steps + 1 in
+          match dir with
+          | Right ->
+              ( (x + num, y, generate_range x y num `X @ acc, steps)
+              , (x + num, y) )
+          | Left ->
+              ( (x - num, y, generate_range x y (-num) `X @ acc, steps)
+              , (x - num, y) )
+          | Up ->
+              ( (x, y + num, generate_range x y num `Y @ acc, steps)
+              , (x, y + num) )
+          | Down ->
+              ( (x, y - num, generate_range x y (-num) `Y @ acc, steps)
+              , (x, y - num) ) )
+        setup
+      |> fst
+    in
+    (lst, steps)
 end
 
 module PointSet = Set.Make (struct
@@ -66,67 +111,22 @@ module PointSet = Set.Make (struct
 end)
 
 module Day3 = struct
-  let input = None
+  (* let input = None *)
 
   (* let input = Some "12\n14\n1969\n100756" *)
-  (* let input = *)
-  (*   Some "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83" *)
+  let input =
+    Some "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83"
 
   (* let input = Some "R8,U5,L5,D3\nU7,R6,D4,L4" *)
 
-  (* let input = *)
-  (*   Some "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83" *)
-
-  let part1_expected = 316
+  let part1_expected = 159
 
   let part1 input =
     (* Input.crack_input input |> Input.show_string_list_list |> print_endline ; *)
-    let path1, path2 =
-      Input.crack_input input
-      |> List.map ~f:(fun a -> List.map a ~f:(fun a -> Input.parse_input a))
-      |> function a :: b :: _ -> (a, b) | _ -> failwith "should be two paths"
-    in
-    let calc_points setup =
-      let generate_range x y num = function
-        | `X ->
-            if num >= 0 then
-              List.map
-                (List.range ~start:`inclusive ~stop:`inclusive x (x + num))
-                ~f:(fun n -> (n, y))
-            else
-              List.map
-                (List.range ~start:`inclusive ~stop:`inclusive (x + num) x)
-                ~f:(fun n -> (n, y))
-        | `Y ->
-            if num >= 0 then
-              List.map
-                (List.range ~start:`inclusive ~stop:`inclusive y (y + num))
-                ~f:(fun n -> (x, n))
-            else
-              List.map
-                (List.range ~start:`inclusive ~stop:`inclusive (y + num) y)
-                ~f:(fun n -> (x, n))
-      in
-      let _, _, lst =
-        List.fold_map ~init:(0, 0, [])
-          ~f:(fun (x, y, acc) (dir, num) ->
-            match dir with
-            | Input.Right ->
-                ((x + num, y, generate_range x y num `X @ acc), (x + num, y))
-            | Left ->
-                ((x - num, y, generate_range x y (-num) `X @ acc), (x - num, y))
-            | Up ->
-                ((x, y + num, generate_range x y num `Y @ acc), (x, y + num))
-            | Down ->
-                ((x, y - num, generate_range x y (-num) `Y @ acc), (x, y - num)) )
-          setup
-        |> fst
-      in
-      lst
-    in
+    let path1, path2 = Input.crack_input input in
     let set1, set2 =
-      ( PointSet.of_list (calc_points path1)
-      , PointSet.of_list (calc_points path2) )
+      ( PointSet.of_list (Input.calc_points path1 |> fst)
+      , PointSet.of_list (Input.calc_points path2 |> fst) )
     in
     (* printf "Set1 -> %s\n" (Sexp.to_string_hum (PointSet.sexp_of_t set1)) ; *)
     (* printf "Set2 -> %s\nSet3 -> " (Sexp.to_string_hum (PointSet.sexp_of_t set2)) ; *)
@@ -140,7 +140,7 @@ module Day3 = struct
            if Float.( < ) m acc then m else acc )
     |> int_of_float
 
-  let part2_expected = 11
+  let part2_expected = 610
 
   let part2 _input = 10
 
