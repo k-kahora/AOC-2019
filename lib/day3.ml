@@ -33,14 +33,28 @@ module Input = struct
 
   let read command = (command.[0], String.drop_prefix command 1 |> int_of_string)
 
+  (* The goal is to merge both wires and change the false to a true *)
+  let merge_wires p1 p2 =
+    let panel = Map.empty (module PointKey) in
+    Map.fold2 ~init:panel
+      ~f:(fun ~key ~data panel ->
+        match data with
+        | `Both ((_, step1), (_, step2)) ->
+            Map.add_exn panel ~key ~data:(true, step1 + step2)
+        | `Right a | `Left a ->
+            Map.add_exn panel ~key ~data:a )
+      p1 p2
+
   let[@ocaml.warning "-9-11"] move_wire panel position step_start (dir, count) =
     let direction = direction dir in
     (* put the value in map at each step *)
     let rec loop cur_pos map steps = function
       | n when n > 0 ->
+          (* let x, y = cur_pos in *)
+          (* printf "(%d,%d)\n" x y ; *)
           let next_step = direction cur_pos in
           let map =
-            Map.update panel next_step ~f:(Option.value ~default:(false, steps))
+            Map.update map next_step ~f:(Option.value ~default:(false, steps))
           in
           loop next_step map (steps + 1) (n - 1)
       | _ ->
@@ -51,37 +65,48 @@ module Input = struct
   let unroll_wire wire =
     let mapping = Map.empty (module PointKey) in
     let wires = List.map wire ~f:read in
-    List.fold
-      ~init:(mapping, (0, 0), 0)
-      ~f:(fun (panel, position, step) dir -> move_wire panel position step dir)
-      wires
+    let unrolled_wire, _, _ =
+      List.fold
+        ~init:(mapping, (0, 0), 1)
+        ~f:(fun (panel, position, step) dir -> move_wire panel position step dir)
+        wires
+    in
+    unrolled_wire
+
+  let wrap_and_roll ~f input =
+    let panel = Map.empty (module PointKey) in
+    let wrapped =
+      List.fold ~init:panel
+        ~f:(fun panel wire -> unroll_wire wire |> merge_wires panel)
+        input
+    in
+    let inter = Map.filter ~f:fst wrapped in
+    (* print_map inter ; *)
+    inter |> Map.map ~f:snd |> Map.fold ~init:Int.max_value ~f
 end
 
 (* Plan is to create a map of each point and also keep track of steps for each point *)
 
 module Day3 = struct
-  (* let input = None *)
+  let input = None
 
-  (* let input = Some "12\n14\n1969\n100756" *)
-  let input =
-    Some "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83"
-
-  (* let input = Some "R8,U5,L5,D3\nU7,R6,D4,L4" *)
-
-  let part1_expected = 159
+  let part1_expected = 316
 
   let part1 input =
     let wires = Input.crack_input input in
-    let mapping, _, _ =
-      List.map ~f:Input.unroll_wire wires |> List.hd |> Option.value_exn
+    let manhattan (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2) in
+    let f_part1 ~key ~data:_ min_distance =
+      min (manhattan (0, 0) key) min_distance
     in
-    Input.print_map mapping ;
-    (* unroll wires *)
-    10
+    Input.wrap_and_roll ~f:f_part1 wires
+  (* unroll wires *)
 
   let part2_expected = 610
 
-  let part2 _input = 10
+  let part2 input =
+    let wires = Input.crack_input input in
+    let f_part1 ~key:_ ~data min_distance = min min_distance data in
+    Input.wrap_and_roll ~f:f_part1 wires
 
   let day = 3
 
