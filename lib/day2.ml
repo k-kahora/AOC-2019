@@ -53,12 +53,8 @@ module Day2 = struct
           let out =
             List.fold_until ~init:(0, 0)
               ~f:(fun _acc j ->
-                (* printf "(%d, %d)" (fst acc) (snd acc) ; *)
                 let output = Input.cycle codes (Array.copy program) (i, j) in
-                if output = 19690720 then (
-                  printf "out -> %d,%d" i j ;
-                  Stop (i, j) )
-                else Continue (i, j) )
+                if output = 19690720 then Stop (i, j) else Continue (i, j) )
               ~finish:(fun _ -> (0, 0))
               range
           in
@@ -66,7 +62,6 @@ module Day2 = struct
         ~finish:(fun _ -> failwith "can't finish")
         range
     in
-    printf "(%d, %d)" (fst v) (snd v) ;
     let noun, verb = v in
     (noun * 100) + verb
 
