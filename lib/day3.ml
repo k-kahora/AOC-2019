@@ -101,7 +101,7 @@ module Day3 = struct
     Input.wrap_and_roll ~f:f_part1 wires
   (* unroll wires *)
 
-  let part2_expected = 610
+  let part2_expected = 16368
 
   let part2 input =
     let wires = Input.crack_input input in
