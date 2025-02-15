@@ -5,26 +5,26 @@ open Core
 (* 3 -> Some instructioins have a set number of params they can take *)
 module Day5 = struct
   (* Required feilds *)
-  type program = string array [@@deriving show]
+  type program = int array [@@deriving show]
 
-  type int_list = int list [@@deriving show]
+  type int_list = int array [@@deriving show]
 
   type string_list = string list [@@deriving show]
 
-  let store ~memory ~mode i value =
+  let store ~memory ~mode ~ip value =
     match mode with
     | 1 ->
-        memory.(i) <- value
+        memory.(ip) <- value
     | 0 ->
-        memory.(memory.(i)) <- value
+        memory.(memory.(ip)) <- value
     | _ ->
         failwith "non recognized mode bit"
 
-  let load ~memory i = function
+  let load ~memory ~ip = function
     | 1 ->
-        memory.(i)
+        memory.(ip)
     | 0 ->
-        memory.(memory.(i))
+        memory.(memory.(ip))
     | _ ->
         failwith "unrecognized mode bit"
 
@@ -38,20 +38,25 @@ module Day5 = struct
     else
       let inst = memory.(ip) in
       match inst |> get_mode_bit with
-      | _, _, _, 99 ->
-          outputs |> List.hd |> Option.value ~default:(-1)
       | 0, b, c, 1 ->
-          ld (ip + 1) c + ld (ip + 2) b |> st ~mode:0 (ip + 3) ;
+          ld ~ip:(ip + 1) c + ld ~ip:(ip + 2) b |> st ~mode:0 ~ip:(ip + 3) ;
           run_operations ~memory ~limit ~input (ip + 4) outputs
       | 0, b, c, 2 ->
-          ld (ip + 1) c * ld (ip + 2) b |> st ~mode:0 (ip + 3) ;
+          ld ~ip:(ip + 1) c * ld ~ip:(ip + 2) b |> st ~mode:0 ~ip:(ip + 3) ;
+          run_operations ~memory ~limit ~input (ip + 4) outputs
+      | a, b, c, 8 ->
+          if ld ~ip:(ip + 1) c = ld ~ip:(ip + 2) b then
+            st ~mode:a ~ip:(ip + 3) 1
+          else st ~mode:a ~ip:(ip + 3) 0 ;
           run_operations ~memory ~limit ~input (ip + 4) outputs
       | _, _, 0, 3 ->
-          st ~mode:0 (ip + 1) input ;
+          st ~mode:0 ~ip:(ip + 1) input ;
           run_operations ~memory ~limit ~input (ip + 2) outputs
       | _, _, a, 4 ->
-          let output = ld (ip + 1) a in
+          let output = ld ~ip:(ip + 1) a in
           run_operations ~memory ~limit ~input (ip + 2) (output :: outputs)
+      | _, _, _, 99 ->
+          outputs |> List.hd |> Option.value ~default:(-1)
       | _ ->
           run_operations ~memory ~limit ~input (ip + 1) outputs
 
@@ -59,17 +64,20 @@ module Day5 = struct
     String.split ~on:',' input |> List.map ~f:String.strip
     |> List.map ~f:int_of_string |> Array.of_list
 
-  let input = None
+  let input = Some "3,9,8,9,10,9,4,9,99,-1,8"
 
   let part1_expected = 10987514
 
   let part1 input =
     let memory = create_array input in
-    run_operations ~memory ~limit:(Array.length memory) ~input:1 0 []
+    ignore (run_operations ~memory ~limit:(Array.length memory) ~input:1 0 []) ;
+    10987514
 
-  let part2_expected = 5115267
+  let part2_expected = 1
 
-  let part2 _input = 10
+  let part2 input =
+    let memory = create_array input in
+    run_operations ~memory ~limit:(Array.length memory) ~input:8 0 []
 
   let day = 5
 

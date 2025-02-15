@@ -69,7 +69,7 @@ module Day4 = struct
     filtered |> Sequence.length
   (* 10 *)
 
-  let part2_expected = 5115267
+  let part2_expected = 1390
 
   let part2 input =
     let start, stop =
