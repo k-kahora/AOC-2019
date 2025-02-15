@@ -87,11 +87,10 @@ module Day5 = struct
   let part1_expected = 10987514
 
   let part1 input =
-    let _memory = create_array input in
-    (* ignore (run_operations ~memory ~limit:(Array.length memory) ~input:1 0 []) ; *)
-    10987514
+    let memory = create_array input in
+    run_operations ~memory ~limit:(Array.length memory) ~input:1 0 []
 
-  let part2_expected = 1
+  let part2_expected = 14195011
 
   let part2 input =
     let memory = create_array input in
