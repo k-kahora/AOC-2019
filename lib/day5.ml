@@ -34,12 +34,12 @@ module Day5 = struct
   let rec run_operations ~memory ~limit ~input ip outputs =
     let ld = load ~memory in
     let st = store ~memory in
-    if ip >= limit then outputs
+    if ip >= limit then -1
     else
       let inst = memory.(ip) in
       match inst |> get_mode_bit with
       | _, _, _, 99 ->
-          outputs
+          outputs |> List.hd |> Option.value ~default:(-1)
       | 0, b, c, 1 ->
           ld (ip + 1) c + ld (ip + 2) b |> st ~mode:0 (ip + 3) ;
           run_operations ~memory ~limit ~input (ip + 4) outputs
@@ -51,7 +51,6 @@ module Day5 = struct
           run_operations ~memory ~limit ~input (ip + 2) outputs
       | _, _, a, 4 ->
           let output = ld (ip + 1) a in
-          printf "output -> %d\n" output ;
           run_operations ~memory ~limit ~input (ip + 2) (output :: outputs)
       | _ ->
           run_operations ~memory ~limit ~input (ip + 1) outputs
@@ -62,15 +61,11 @@ module Day5 = struct
 
   let input = None
 
-  let part1_expected = 3412094
+  let part1_expected = 10987514
 
   let part1 input =
     let memory = create_array input in
-    let outputs =
-      run_operations ~memory ~limit:(Array.length memory) ~input:1 0 []
-    in
-    show_int_list outputs |> printf "outputs -> %s" ;
-    10
+    run_operations ~memory ~limit:(Array.length memory) ~input:1 0 []
 
   let part2_expected = 5115267
 
