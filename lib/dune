@@ -1,6 +1,6 @@
 (library
  (name advent_lib)
-  (modules test_runner input day1 day2 day3 day4)
+  (modules test_runner input day1 day2 day3 day4 day5)
    (preprocess (pps ppx_deriving.show ppx_jane))
   (libraries core lwt cohttp cohttp-lwt-unix alcotest )
  (public_name advent.lib)

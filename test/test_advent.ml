@@ -1,3 +1,7 @@
+module TestDay5 = Advent_lib.Test_runner.Test (Advent_lib.Day5.Day5)
+
+let _ = TestDay5.test ()
+
 module TestDay4 = Advent_lib.Test_runner.Test (Advent_lib.Day4.Day4)
 
 let _ = TestDay4.test ()
