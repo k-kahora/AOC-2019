@@ -1,5 +1,4 @@
 open Core
-(* Requirements *)
 
 (* 1 -> negative numbers *)
 (* 2 -> a instruction pointer *)
@@ -12,73 +11,65 @@ module Day5 = struct
 
   type string_list = string list [@@deriving show]
 
-  let add_mult ~memory p1 p2 p3 inst =
-    printf "add_mult -> %d" p3 ;
-    ( match inst with
-    | '1' ->
-        p1 + p2
-    | '2' ->
-        p1 * p2
+  let store ~memory ~mode i value =
+    match mode with
+    | 1 ->
+        memory.(i) <- value
+    | 0 ->
+        memory.(memory.(i)) <- value
     | _ ->
-        failwith "non recognized opcode" )
-    |> string_of_int
-    |> fun a -> memory.(p3) <- a
+        failwith "non recognized mode bit"
+
+  let load ~memory i = function
+    | 1 ->
+        memory.(i)
+    | 0 ->
+        memory.(memory.(i))
+    | _ ->
+        failwith "unrecognized mode bit"
+
+  let get_mode_bit n =
+    (n / 10000 mod 10, n / 1000 mod 10, n / 100 mod 10, n mod 100)
+
+  let rec run_operations ~memory ~limit ~input ip outputs =
+    let ld = load ~memory in
+    let st = store ~memory in
+    if ip >= limit then outputs
+    else
+      let inst = memory.(ip) in
+      match inst |> get_mode_bit with
+      | _, _, _, 99 ->
+          outputs
+      | 0, b, c, 1 ->
+          ld (ip + 1) c + ld (ip + 2) b |> st ~mode:0 (ip + 3) ;
+          run_operations ~memory ~limit ~input (ip + 4) outputs
+      | 0, b, c, 2 ->
+          ld (ip + 1) c * ld (ip + 2) b |> st ~mode:0 (ip + 3) ;
+          run_operations ~memory ~limit ~input (ip + 4) outputs
+      | _, _, 0, 3 ->
+          st ~mode:0 (ip + 1) input ;
+          run_operations ~memory ~limit ~input (ip + 2) outputs
+      | _, _, a, 4 ->
+          let output = ld (ip + 1) a in
+          printf "output -> %d\n" output ;
+          run_operations ~memory ~limit ~input (ip + 2) (output :: outputs)
+      | _ ->
+          run_operations ~memory ~limit ~input (ip + 1) outputs
 
   let create_array input =
     String.split ~on:',' input |> List.map ~f:String.strip
-
-  (* run memory is what we update input is the starting value position is the current memory output is the list of otuputs and code is the current code *)
-  let mode ~p memory mode_bit =
-    printf "mode p -> %s" p ;
-    match mode_bit with
-    | '0' ->
-        memory.(p |> int_of_string)
-    | '1' ->
-        p
-    | _ ->
-        failwith "no a recognized mode bit"
-
-  let execute_opcode ~memory ~f _ b c inst param1 param2 param3 =
-    let param3 = param3 |> int_of_string in
-    let param2 = mode ~p:param2 memory b |> int_of_string in
-    let param1 = mode ~p:param1 memory c |> int_of_string in
-    f ~memory param1 param2 param3 inst
-
-  let rec run memory input outputs code =
-    match code with
-    | [] ->
-        outputs |> show_int_list |> printf "%s" ;
-        outputs
-    | "3" :: pos :: tail ->
-        memory.(pos |> int_of_string) <- input ;
-        run memory input outputs tail
-    | "4" :: adress :: tail ->
-        run memory input ((adress |> int_of_string) :: outputs) tail
-    | opcode :: param1 :: param2 :: param3 :: tail -> (
-        printf "\ncurrent opcode -> %s\n" opcode ;
-        match String.to_list opcode with
-        | [b; c; _; inst] ->
-            execute_opcode '0' b c inst param1 param2 param3 ~f:add_mult ~memory ;
-            run memory input outputs tail
-        | [inst] ->
-            execute_opcode '0' '1' '1' inst param1 param2 param3 ~f:add_mult
-              ~memory ;
-            run memory input outputs tail
-        | _ ->
-            failwith "empty opcode" )
-    | a ->
-        show_string_list a |> printf "%s" ;
-        failwith "invalid opcode"
+    |> List.map ~f:int_of_string |> Array.of_list
 
   let input = None
 
   let part1_expected = 3412094
 
   let part1 input =
-    let codes = create_array input in
-    let memory = codes |> Array.of_list in
-    printf "array length -> %d" (Array.length memory) ;
-    let _outputs = run memory "1" [] codes in
+    let memory = create_array input in
+    let outputs =
+      run_operations ~memory ~limit:(Array.length memory) ~input:1 0 []
+    in
+    show_int_list outputs |> printf "outputs -> %s" ;
     10
 
   let part2_expected = 5115267
