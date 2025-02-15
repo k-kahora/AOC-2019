@@ -67,7 +67,6 @@ module Day5 = struct
           run_operations ~memory ~limit ~input (ip + 2) outputs
       | _, _, a, 4 ->
           let output = ld ~ip:(ip + 1) a in
-          printf "output -> %d\n" output ;
           run_operations ~memory ~limit ~input (ip + 2) (output :: outputs)
       | _, _, _, 99 ->
           outputs |> List.hd |> Option.value ~default:(-1)
