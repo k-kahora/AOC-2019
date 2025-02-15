@@ -1,4 +1,6 @@
 (executable
  (public_name advent)
+ (modes byte exe)
+ (flags (:standard -g))
  (name main)
  (libraries core advent.lib))

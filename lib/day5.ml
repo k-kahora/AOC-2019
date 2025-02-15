@@ -38,8 +38,8 @@ module Day5 = struct
     | _ ->
         failwith "no a recognized mode bit"
 
-  let execute_opcode ~memory ~f a b c inst param1 param2 param3 =
-    let param3 = mode ~p:param3 memory a |> int_of_string in
+  let execute_opcode ~memory ~f _ b c inst param1 param2 param3 =
+    let param3 = param3 |> int_of_string in
     let param2 = mode ~p:param2 memory b |> int_of_string in
     let param1 = mode ~p:param1 memory c |> int_of_string in
     f ~memory param1 param2 param3 inst
