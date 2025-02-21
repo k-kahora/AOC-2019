@@ -1,43 +1,51 @@
 open Core
 
+let ( =? ) = Poly.( = )
+
 module Input = struct
   let crack_input _input = ()
 end
 
-module Graph = struct
-  type 'a graph = {edges: ('a * 'a list) list} [@@deriving show]
-
-  let add_node {edges= graph} node neighbors = (node, neighbors) :: graph
-
-  let init graph = {edges= graph}
-
-  let add_edge {edges= graph} node1 node2 =
-    let rec add_edge' = function
-      | [] ->
-          [(node1, [node2])]
-      | (n, neighbors) :: rest when n = node1 ->
-          (n, node2 :: neighbors) :: rest
-      | x :: rest ->
-          x :: add_edge' rest
-    in
-    add_edge' graph
-end
-
 module Day6 = struct
-  let input = None
-
   (* let input = Some "12\n14\n1969\n100756" *)
+  let input = Some {|
+COM)B
+B)C
+C)D
+D)E
+E)F
+B)G
+G)H
+D)I
+E)J
+J)K
+K)L
+|}
 
-  let part1_expected = 3412094
+  let part1_expected = 10
 
-  let part1 _input =
-    let _example_graph =
-      Graph.init [(10, [20; 30; 40]); (20, [30]); (40, [20; 30])]
-    in
-    let graph_str =
-      Format.asprintf "%a" (Graph.pp_graph Format.pp_print_int) _example_graph
-    in
-    printf "%s\n" graph_str ; 0
+  type hash_alist = (string * string list) list [@@deriving show]
+
+  let hashtbl_to_alist (ht : (string, string list) Hashtbl.t) :
+      (string * string list) list =
+    Hashtbl.to_alist ht
+
+  let part1 input =
+    let graph = Hashtbl.create (module String) in
+    List.iter
+      (String.split ~on:'\n' input |> List.filter ~f:(Poly.( <> ) ""))
+      ~f:(fun mapping ->
+        match String.split ~on:')' mapping with
+        | [orbit; orbitter] ->
+            Hashtbl.update graph orbit ~f:(function
+              | None ->
+                  [orbitter]
+              | Some children ->
+                  orbitter :: children )
+        | _ ->
+            failwith "Should not trigger" ) ;
+    show_hash_alist (hashtbl_to_alist graph) |> printf "hash -> %s" ;
+    10
 
   let part2_expected = 5115267
 
