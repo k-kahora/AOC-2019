@@ -90,7 +90,7 @@ module Day4 = struct
       |> Sequence.filter ~f:exactly_two_next
       |> Sequence.map ~f:String.of_list
     in
-    Sequence.iter ~f:(printf "%s\n") filtered ;
+    (* Sequence.iter ~f:(printf "%s\n") filtered ; *)
     filtered |> Sequence.length
 
   let day = 4

@@ -7,31 +7,10 @@ module Input = struct
 end
 
 module Day6 = struct
-  (* let input = Some "12\n14\n1969\n100756" *)
   let part1_expected = 417916
 
   let input = None
 
-  (*   let input = *)
-  (*     Some {| *)
-(* COM)B *)
-(* B)C *)
-(* C)D *)
-(* D)E *)
-(* E)F *)
-(* B)G *)
-(* G)H *)
-(* D)I *)
-(* E)J *)
-(* J)K *)
-(* K)L *)
-(* K)YOU *)
-(* I)SAN *)
-(* |} *)
-
-  (*   let part1_expected = 54 *)
-
-  (* let part1_expected = 42 *)
   type string_int_list = (string * int) list [@@deriving show]
 
   type hash_alist = (string * string list) list [@@deriving show]
@@ -71,8 +50,6 @@ module Day6 = struct
                   orbitter :: children )
         | _ ->
             failwith "Should not trigger" ) ;
-    (* (\* show_hash_alist (hashtbl_to_alist graph) |> printf "hash -> %s" ; *\) *)
-    (* printf "result -> %d" (copute_orbits graph) ; *)
     compute_orbits graph
 
   let part2_expected = 523
@@ -85,7 +62,6 @@ module Day6 = struct
     let queue = Queue.create () in
     Queue.enqueue queue you ;
     let rec bfs () =
-      (* printf "q -> %s\n" (show_string_int_list (queue_to_list queue)) ; *)
       if Queue.is_empty queue then None
       else
         let node, depth = Queue.dequeue_exn queue in
@@ -118,10 +94,10 @@ module Day6 = struct
             update_hash orbit orbitter ; update_hash orbitter orbit
         | _ ->
             failwith "invalid input" ) ;
-    (* show_hash_alist (hashtbl_to_alist graph) |> printf "hash -> %s" ; *)
-    printf "result -> %d"
-      (compute_closest graph ("YOU", 0) "SAN" |> Option.value ~default:(-1)) ;
-    10
+    (* Subtracting 2 to avoind including source and dest node in count *)
+    compute_closest graph ("YOU", 0) "SAN"
+    |> Option.value ~default:1
+    |> fun a -> a - 2
 
   let day = 6
 
